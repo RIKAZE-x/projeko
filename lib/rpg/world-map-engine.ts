@@ -17,7 +17,7 @@ export const WORLD_MAP:WorldMapNode[]=[
 export function getNode(id:string){return WORLD_MAP.find(n=>n.id===id);}
 export function travelPlan(from:string,to:string,characterLevel:number):TravelPlan|null{
  const a=getNode(from),b=getNode(to); if(!a||!b||!a.connected.includes(b.id)||!b.unlocked)return null;
- const distance=Math.max(1,Math.abs(a.level-b.level)+5); const levelGap=Math.max(0,b.level-characterLevel); const risk=Math.min(0.95,0.05+levelGap*0.012+distance*0.006); return {from,to:distance?from:from,to,distance,goldCost:Math.round(distance*3),risk,encounterChance:Math.min(0.8,risk*0.9+0.08)};
+ const distance=Math.max(1,Math.abs(a.level-b.level)+5); const levelGap=Math.max(0,b.level-characterLevel); const risk=Math.min(0.95,0.05+levelGap*0.012+distance*0.006); return {from:a.id,to:b.id,distance,goldCost:Math.round(distance*3),risk,encounterChance:Math.min(0.8,risk*0.9+0.08)};
 }
 
 export function resolveTravel(plan:TravelPlan,seed:number){let x=(seed|0)>>>0;x=(x*1664525+1013904223)>>>0;const roll=x/4294967296;return {encounter:roll<plan.encounterChance,roll,destination:plan.to};}
