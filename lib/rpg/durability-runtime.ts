@@ -33,7 +33,7 @@ export interface RepairInput {
 
 export interface RepairResult {
   ok: boolean;
-  reason?: 'already-full' | 'insufficient-gold' | 'insufficient-materials' | 'duplicate-transaction';
+  reason?: 'item-not-found' | 'already-full' | 'insufficient-gold' | 'insufficient-materials' | 'duplicate-transaction';
   item: Item;
   gold: number;
   materialCount: number;
