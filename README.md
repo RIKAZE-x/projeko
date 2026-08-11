@@ -1,20 +1,26 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# VEILBOUND — Chronicles of the Last Flame
 
-# Run and deploy your AI Studio app
+A detailed dark-fantasy RPG prototype built with Next.js + React. The interface combines deterministic combat, character switching, quests, inventory/lore panels, progression, combat logs, and an optional OpenAI-powered Oracle.
 
-This contains everything you need to run your app locally.
+## Features
 
-View your app in AI Studio: https://ai.studio/apps/5fc20abb-de0c-4e9b-bfa7-ed009f22f289
+- Three playable heroes with distinct stats and roles.
+- HP, mana, XP, levels, gold, armor, enemy scaling and rewards.
+- Attack, Astral Art, Guard and camp/rest actions.
+- Quest journal, inventory and lore tabs.
+- Live chronicle/combat event feed.
+- Responsive dark-fantasy UI designed for desktop and mobile.
+- `/api/ai` server route for contextual RPG narration using the OpenAI Responses API.
 
-## Run Locally
+## Run locally
 
-**Prerequisites:**  Node.js
+1. Install dependencies: `npm install`
+2. Copy `.env.example` to `.env.local` and set `OPENAI_API_KEY`.
+3. Start: `npm run dev`
+4. Open `http://localhost:3000`.
 
+The API key must remain server-side; do not prefix it with `NEXT_PUBLIC_`.
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Roadmap
+
+The prototype is intentionally structured so it can grow into a full RPG: persistent saves, equipment affixes, skill trees, procedural maps, NPC relationships, crafting, status effects, boss phases, multiplayer-ready state boundaries, and AI-generated quests/lore.
