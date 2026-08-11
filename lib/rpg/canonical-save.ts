@@ -1,7 +1,9 @@
 import type { GameState, Item } from './types';
 import type { SocialState } from './social-runtime';
 import type { QuestWorldPersistence } from './quest-world-persistence';
+import type { ShopEconomyState } from './shop-economy-persistence';
 import { EMPTY_QUEST_WORLD_PERSISTENCE } from './quest-world-persistence';
+import { EMPTY_SHOP_ECONOMY } from './shop-economy-persistence';
 
 export interface CanonicalSaveProfile {
   version: 2;
@@ -16,6 +18,7 @@ export interface CanonicalSaveProfile {
     victoryKeys: string[];
     claimedLootKeys: string[];
     questWorld: QuestWorldPersistence;
+    shopEconomy: ShopEconomyState;
   };
 }
 
@@ -40,6 +43,7 @@ export function createSaveProfile(
       victoryKeys: persistence.victoryKeys ?? [],
       claimedLootKeys: persistence.claimedLootKeys ?? [],
       questWorld: persistence.questWorld ?? EMPTY_QUEST_WORLD_PERSISTENCE,
+      shopEconomy: persistence.shopEconomy ?? EMPTY_SHOP_ECONOMY,
     },
   };
 }
@@ -49,7 +53,13 @@ export function validateSaveProfile(input: unknown): CanonicalSaveProfile | null
   const x = input as Partial<CanonicalSaveProfile>;
   if (x.version !== 2 || !x.game || !x.social || !x.session) return null;
   if (typeof x.session.dungeonSeed !== 'number' || typeof x.session.roomIndex !== 'number') return null;
-  const p = x.persistence ?? { inventoryItems: [], victoryKeys: [], claimedLootKeys: [], questWorld: EMPTY_QUEST_WORLD_PERSISTENCE };
+  const p = x.persistence ?? {
+    inventoryItems: [],
+    victoryKeys: [],
+    claimedLootKeys: [],
+    questWorld: EMPTY_QUEST_WORLD_PERSISTENCE,
+    shopEconomy: EMPTY_SHOP_ECONOMY,
+  };
   return {
     ...x,
     persistence: {
@@ -57,6 +67,7 @@ export function validateSaveProfile(input: unknown): CanonicalSaveProfile | null
       victoryKeys: p.victoryKeys ?? [],
       claimedLootKeys: p.claimedLootKeys ?? [],
       questWorld: p.questWorld ?? EMPTY_QUEST_WORLD_PERSISTENCE,
+      shopEconomy: p.shopEconomy ?? EMPTY_SHOP_ECONOMY,
     },
   } as CanonicalSaveProfile;
 }
