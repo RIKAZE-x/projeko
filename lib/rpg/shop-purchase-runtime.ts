@@ -5,6 +5,7 @@ export interface ShopPurchaseInput {
   stock: number;
   gold: number;
   quantity?: number;
+  transactionId: string;
 }
 
 export interface ShopPurchaseResult {
@@ -32,7 +33,7 @@ export function executeShopPurchase(input: ShopPurchaseInput): ShopPurchaseResul
     ok: true,
     gold: input.gold - total,
     stock: input.stock - quantity,
-    inventoryItemIds: Array.from({ length: quantity }, (_, index) => `${input.itemId}#${index + 1}`),
-    purchaseKey: `${input.npcId}:${input.itemId}:${Date.now()}`,
+    inventoryItemIds: Array.from({ length: quantity }, (_, index) => `${input.itemId}#${input.transactionId}#${index + 1}`),
+    purchaseKey: `${input.npcId}:${input.itemId}:${input.transactionId}`,
   };
 }
