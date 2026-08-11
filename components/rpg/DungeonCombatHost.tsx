@@ -1,21 +1,24 @@
 'use client';
 
+import type { GameState } from '@/lib/rpg/types';
 import { TacticalArenaController } from './TacticalArenaController';
 
 export interface DungeonCombatHostProps {
-  monsterId: string;
-  onVictory?: () => void;
-  onDefeat?: () => void;
-  onClose?: () => void;
+  game: GameState;
+  action: Parameters<typeof TacticalArenaController>[0]['action'];
+  bossOrigin: { x: number; y: number };
+  playerPosition: { x: number; y: number };
 }
 
-export function DungeonCombatHost({ monsterId, onVictory, onDefeat, onClose }: DungeonCombatHostProps) {
+export function DungeonCombatHost({ game, action, bossOrigin, playerPosition }: DungeonCombatHostProps) {
   return (
     <section aria-label="Dungeon combat" className="rounded-2xl border border-white/10 bg-black/30 p-4">
-      <div className="mb-3 text-xs uppercase tracking-widest opacity-50">Encounter</div>
-      <div className="mb-3 text-sm font-semibold">{monsterId}</div>
-      <TacticalArenaController onVictory={onVictory} onDefeat={onDefeat} />
-      {onClose && <button type="button" onClick={onClose} className="mt-3 text-xs opacity-60 hover:opacity-100">Retreat</button>}
+      <TacticalArenaController
+        game={game}
+        action={action}
+        bossOrigin={bossOrigin}
+        playerPosition={playerPosition}
+      />
     </section>
   );
 }
