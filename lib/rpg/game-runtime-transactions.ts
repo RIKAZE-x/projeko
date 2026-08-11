@@ -17,11 +17,8 @@ export interface RuntimeShopPurchaseInput {
 }
 
 export function applyShopPurchase(state: GameRuntimeState, input: RuntimeShopPurchaseInput): GameRuntimeState {
-  const result = executeShopPurchase({
-    ...input,
-    gold: state.game.character.gold,
-  });
-  if (!result.ok) return state;
+  const result = executeShopPurchase({ ...input, gold: state.game.character.gold });
+  if (!result.ok || !result.purchaseKey) return state;
 
   const createdItems = result.inventoryItemIds.map((instanceId) =>
     input.itemFactory
@@ -44,28 +41,28 @@ export function applyShopPurchase(state: GameRuntimeState, input: RuntimeShopPur
         },
   );
 
-  const nextInventory = [...state.inventory, ...createdItems];
   const nextShopEconomy = {
     ...state.shopEconomy,
-    purchasedKeys: [...new Set([...state.shopEconomy.purchasedKeys, result.purchaseKey!])],
-    stock: {
-      ...state.shopEconomy.stock,
-      [`${input.npcId}:${input.itemId}`]: result.stock,
-    },
+    purchasedKeys: [...new Set([...state.shopEconomy.purchasedKeys, result.purchaseKey])],
+    stock: { ...state.shopEconomy.stock, [`${input.npcId}:${input.itemId}`]: result.stock },
     totalGoldSpent: state.shopEconomy.totalGoldSpent + input.price * (input.quantity ?? 1),
   };
 
   return syncCharacterInventory(patchGameRuntimeState(state, {
-    inventory: nextInventory,
+    inventory: [...state.inventory, ...createdItems],
     shopEconomy: nextShopEconomy,
     game: { ...state.game, character: { ...state.game.character, gold: result.gold } },
   }));
 }
 
-export function applyForge(state: GameRuntimeState, input: ForgeInput & { targetItemId?: string }): GameRuntimeState {
+export function applyForge(
+  state: GameRuntimeState,
+  input: ForgeInput & { targetItemId?: string },
+  materialCounts: Record<string, number>,
+): GameRuntimeState {
   const result = executeForgeTransaction({
     gold: state.game.character.gold,
-    materials: Object.fromEntries(Object.entries(state.inventory).filter(([key]) => key.startsWith('material:'))),
+    materials: materialCounts,
     inventory: state.inventory,
     forgeTransactionKeys: state.forge.forgeTransactionKeys,
   }, input);
@@ -84,16 +81,11 @@ export function applyForge(state: GameRuntimeState, input: ForgeInput & { target
 }
 
 export function applyLootClaim(state: GameRuntimeState, sourceKey: string, item: Item | undefined): GameRuntimeState {
-  const claimed = claimGeneratedItem({ items: state.inventory, claimedSources: state.quests.worldFlags.__lootClaims ?? [] }, sourceKey, item);
+  if (state.claimedLootKeys.includes(sourceKey)) return state;
+  const claimed = claimGeneratedItem({ items: state.inventory, claimedSources: state.claimedLootKeys }, sourceKey, item);
   if (!claimed.claimed) return state;
   return syncCharacterInventory(patchGameRuntimeState(state, {
     inventory: claimed.state.items,
-    quests: {
-      ...state.quests,
-      worldFlags: {
-        ...state.quests.worldFlags,
-        __lootClaims: [...claimed.state.claimedSources],
-      },
-    },
+    claimedLootKeys: claimed.state.claimedSources,
   }));
 }
