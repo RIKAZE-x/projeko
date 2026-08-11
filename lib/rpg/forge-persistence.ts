@@ -30,7 +30,7 @@ export function applyForgePersistence(
       : [...state.craftedItemIds, result.outputItemId],
     spentMaterialKeys: [...new Set([...state.spentMaterialKeys, ...spentMaterialKeys])],
     forgeTransactionKeys: [...state.forgeTransactionKeys, result.transactionKey],
-    totalGoldSpent: state.totalGoldSpent + Math.max(0, result.gold),
+    totalGoldSpent: state.totalGoldSpent + Math.max(0, result.goldSpent),
   };
 }
 
