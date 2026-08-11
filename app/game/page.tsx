@@ -1,5 +1,5 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { generateDungeon } from '../../lib/rpg/dungeon-engine';
 import { AssetSprite } from '../../components/rpg/AssetSprite';
 import { SaveControls } from '../../components/rpg/SaveControls';
@@ -7,10 +7,13 @@ import type { GameState } from '../../lib/rpg/types';
 import { aren, monsters } from '../../lib/rpg/content';
 
 function initialGameState():GameState{return {day:18,hour:23,location:'Emberfall — Lower Ward',character:structuredClone(aren),party:[structuredClone(aren)],activeMonster:structuredClone(monsters[0]),economy:{inflation:2.4,trust:87,prices:{iron:14,mithril:240,manaCrystal:91},treasuryReserves:{gold:900000,mana:72000}},logs:['Expedition started.']};}
+function pendingGameState(){if(typeof window==='undefined')return null;try{const raw=sessionStorage.getItem('veilbound.pendingState');if(!raw)return null;sessionStorage.removeItem('veilbound.pendingState');return JSON.parse(raw) as GameState;}catch{return null;}}
+
 export default function GamePage(){
  const [seed]=useState(()=>Date.now()); const dungeon=useMemo(()=>generateDungeon(seed,'C',12),[seed]); const [room,setRoom]=useState(0); const [hp,setHp]=useState(100); const [gold,setGold]=useState(340); const [log,setLog]=useState<string[]>(['Expedition started.']); const [gameState,setGameState]=useState<GameState>(()=>initialGameState());
+ useEffect(()=>{const pending=pendingGameState();if(pending){setGameState(pending);setGold(pending.character.gold);setLog(pending.logs.length?pending.logs:['Game loaded.']);}},[]);
  const current=dungeon.rooms[room];
- function act(){if(current.kind==='Combat'||current.kind==='Elite'||current.kind==='Boss'){setHp(v=>Math.max(1,v-(current.danger%13+4)));setGold(v=>v+current.rewardTier*8);setLog(l=>[`Cleared ${current.kind} encounter. +${current.rewardTier*8} gold.`,...l]);}else{setGold(v=>v+current.rewardTier*5);setLog(l=>[`Resolved ${current.kind} room.`,...l]);}}
+ function act(){if(current.kind==='Combat'||current.kind==='Elite'||current.kind==='Boss'){setHp(v=>Math.max(1,v-(current.danger%13+4)));setGold(v=>v+current.rewardTier*8);setGameState(s=>({...s,character:{...s.character,gold:s.character.gold+current.rewardTier*8},logs:[`Cleared ${current.kind} encounter. +${current.rewardTier*8} gold.`,...s.logs].slice(0,20)}));setLog(l=>[`Cleared ${current.kind} encounter. +${current.rewardTier*8} gold.`,...l]);}else{setGold(v=>v+current.rewardTier*5);setGameState(s=>({...s,logs:[`Resolved ${current.kind} room.`,...s.logs].slice(0,20)}));setLog(l=>[`Resolved ${current.kind} room.`,...l]);}}
  function next(){setRoom(v=>Math.min(dungeon.rooms.length-1,v+1));setLog(l=>[`Entered room ${Math.min(room+2,dungeon.rooms.length)}.`,...l]);}
  const roomAsset=current.kind==='Treasure'?'prop.chest.iron':current.kind==='Shrine'?'prop.shrine.basic':(current.kind==='Combat'||current.kind==='Elite'||current.kind==='Boss')?'monster.slime.verdant':'hero.human.warrior';
  function updateState(next:GameState){setGameState(next);setGold(next.character.gold);setLog(next.logs.length?next.logs:['Save loaded.']);}
