@@ -2,8 +2,10 @@ import type { GameState, Item } from './types';
 import type { SocialState } from './social-runtime';
 import type { QuestWorldPersistence } from './quest-world-persistence';
 import type { ShopEconomyState } from './shop-economy-persistence';
+import type { EquipmentPersistence } from './equipment-persistence';
 import { EMPTY_QUEST_WORLD_PERSISTENCE } from './quest-world-persistence';
 import { EMPTY_SHOP_ECONOMY } from './shop-economy-persistence';
+import { EMPTY_EQUIPMENT_PERSISTENCE } from './equipment-persistence';
 
 export interface CanonicalSaveProfile {
   version: 2;
@@ -19,6 +21,7 @@ export interface CanonicalSaveProfile {
     claimedLootKeys: string[];
     questWorld: QuestWorldPersistence;
     shopEconomy: ShopEconomyState;
+    equipment: EquipmentPersistence;
   };
 }
 
@@ -44,6 +47,7 @@ export function createSaveProfile(
       claimedLootKeys: persistence.claimedLootKeys ?? [],
       questWorld: persistence.questWorld ?? EMPTY_QUEST_WORLD_PERSISTENCE,
       shopEconomy: persistence.shopEconomy ?? EMPTY_SHOP_ECONOMY,
+      equipment: persistence.equipment ?? EMPTY_EQUIPMENT_PERSISTENCE,
     },
   };
 }
@@ -59,6 +63,7 @@ export function validateSaveProfile(input: unknown): CanonicalSaveProfile | null
     claimedLootKeys: [],
     questWorld: EMPTY_QUEST_WORLD_PERSISTENCE,
     shopEconomy: EMPTY_SHOP_ECONOMY,
+    equipment: EMPTY_EQUIPMENT_PERSISTENCE,
   };
   return {
     ...x,
@@ -68,6 +73,7 @@ export function validateSaveProfile(input: unknown): CanonicalSaveProfile | null
       claimedLootKeys: p.claimedLootKeys ?? [],
       questWorld: p.questWorld ?? EMPTY_QUEST_WORLD_PERSISTENCE,
       shopEconomy: p.shopEconomy ?? EMPTY_SHOP_ECONOMY,
+      equipment: p.equipment ?? EMPTY_EQUIPMENT_PERSISTENCE,
     },
   } as CanonicalSaveProfile;
 }
