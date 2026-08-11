@@ -1,0 +1,4 @@
+export interface FactionState { id:string; name:string; reputation:number; standing:'hostile'|'unfriendly'|'neutral'|'friendly'|'allied'; favors:number; flags:string[]; }
+export function standing(reputation:number):FactionState['standing']{if(reputation>=80)return'allied';if(reputation>=40)return'friendly';if(reputation>=-10)return'neutral';if(reputation>=-50)return'unfriendly';return'hostile';}
+export function modifyFaction(state:FactionState,delta:number,flag?:string):FactionState{const reputation=Math.max(-100,Math.min(100,state.reputation+delta));return{...state,reputation,standing:standing(reputation),favors:Math.max(0,state.favors+(delta>=20?1:0)),flags:flag&& !state.flags.includes(flag)?[...state.flags,flag]:state.flags};}
+export function routeRiskModifier(factions:FactionState[]){const hostile=factions.filter(f=>f.standing==='hostile').length;const allied=factions.filter(f=>f.standing==='allied').length;return Math.max(0.1,1+hostile*0.12-allied*0.06);}
