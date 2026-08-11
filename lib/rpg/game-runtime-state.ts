@@ -11,6 +11,7 @@ export interface GameRuntimeState {
   game: GameState;
   dungeon: DungeonRoomRuntime;
   inventory: Item[];
+  claimedLootKeys: string[];
   equipment: EquipmentPersistence;
   quests: QuestWorldPersistence;
   shopEconomy: ShopEconomyState;
