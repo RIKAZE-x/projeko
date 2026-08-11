@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "policy": "CC0-first",
+  "sources": [
+    {"name":"Kenney Roguelike/RPG Pack","url":"https://kenney.nl/assets/roguelike-rpg-pack","license":"CC0","tileSize":"16x16"},
+    {"name":"Kenney RPG Base","url":"https://kenney.nl/assets/rpg-base","license":"CC0"},
+    {"name":"Kenney Roguelike Caves & Dungeons","url":"https://kenney.nl/assets/roguelike-caves-dungeons","license":"CC0"},
+    {"name":"Kenney RPG Urban Pack","url":"https://kenney.nl/assets/rpg-urban-pack","license":"CC0","tileSize":"16x16"}
+  ],
+  "logicalAssets": {
+    "tile.dungeon.floor": {"fallback":"/assets/veilbound/dungeon-floor.svg"},
+    "tile.dungeon.wall": {"fallback":"/assets/veilbound/dungeon-wall.svg"},
+    "prop.chest.iron": {"fallback":"/assets/veilbound/chest.svg"},
+    "prop.shrine.basic": {"fallback":"/assets/veilbound/shrine.svg"},
+    "monster.slime.verdant": {"fallback":"/assets/veilbound/verdant-slime.svg"},
+    "hero.human.warrior": {"fallback":"/assets/veilbound/hero-warrior.svg"},
+    "ui.panel.rpg": {"fallback":"/assets/veilbound/ui-panel.svg"}
+  }
+}
