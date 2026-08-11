@@ -25,13 +25,13 @@ export function executeRepairTransaction(
   if (!target) {
     const result: RepairResult = {
       ok: false,
-      reason: 'already-full',
-      item: target as never,
+      reason: 'item-not-found',
+      item: {} as Item,
       gold: state.gold,
       materialCount: state.materialCount,
       repairedPoints: 0,
     };
-    return { ok: false, state, result };
+    return { ok: false, reason: result.reason, state, result };
   }
 
   const result = repairItem(
@@ -46,7 +46,7 @@ export function executeRepairTransaction(
     state.repairTransactionKeys,
   );
 
-  if (!result.ok) return { ok: false, state, result };
+  if (!result.ok) return { ok: false, reason: result.reason, state, result };
 
   const inventory = state.inventory.map((item) => item.id === target.id ? result.item : item);
   return {
