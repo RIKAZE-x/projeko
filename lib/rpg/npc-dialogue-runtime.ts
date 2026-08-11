@@ -1,7 +1,8 @@
-import type { QuestWorldPersistence } from './quest-world-persistence';
-import { applyQuestChoice, type QuestChoice, type QuestChoiceContext } from './quest-choice-resolver';
+import type { QuestDefinition, QuestRuntimeState } from './quest-runtime';
+import { chooseQuestBranch, resolveQuestChoice, type QuestChoiceReaction } from './quest-choice-resolver';
 
-export interface DialogueNode { id:string; speaker:string; text:string; choices:QuestChoice[]; }
+export interface DialogueChoice { id:string; text:string; nextNodeId?:string; }
+export interface DialogueNode { id:string; speaker:string; text:string; choices:DialogueChoice[]; }
 export interface DialogueState { npcId:string; nodeId:string; history:string[]; }
 
 export function beginDialogue(npcId:string,node:DialogueNode):DialogueState {
@@ -10,10 +11,15 @@ export function beginDialogue(npcId:string,node:DialogueNode):DialogueState {
 
 export function chooseDialogue(
  state:DialogueState,
- choice:QuestChoice,
- context:QuestChoiceContext,
- world:QuestWorldPersistence,
-):{state:DialogueState; world:QuestWorldPersistence; nextNodeId?:string} {
- const resolved=applyQuestChoice(choice,context,world);
- return {state:{...state,history:[...state.history,choice.id],nodeId:choice.nextNodeId??state.nodeId},world:resolved.world,nextNodeId:choice.nextNodeId};
+ choice:DialogueChoice,
+ quest:QuestDefinition,
+ questState:QuestRuntimeState,
+):{state:DialogueState; questState:QuestRuntimeState; reaction:QuestChoiceReaction} {
+ const nextState=chooseQuestBranch(quest,questState,choice.id);
+ const reaction=resolveQuestChoice(quest,nextState,choice.id);
+ return {
+  state:{...state,history:[...state.history,choice.id],nodeId:choice.nextNodeId??state.nodeId},
+  questState:nextState,
+  reaction,
+ };
 }
