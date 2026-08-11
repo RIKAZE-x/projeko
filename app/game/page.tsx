@@ -2,45 +2,17 @@
 import { useMemo, useState } from 'react';
 import { generateDungeon } from '../../lib/rpg/dungeon-engine';
 import { AssetSprite } from '../../components/rpg/AssetSprite';
+import { SaveControls } from '../../components/rpg/SaveControls';
+import type { GameState } from '../../lib/rpg/types';
+import { aren, monsters } from '../../lib/rpg/content';
 
+function initialGameState():GameState{return {day:18,hour:23,location:'Emberfall — Lower Ward',character:structuredClone(aren),party:[structuredClone(aren)],activeMonster:structuredClone(monsters[0]),economy:{inflation:2.4,trust:87,prices:{iron:14,mithril:240,manaCrystal:91},treasuryReserves:{gold:900000,mana:72000}},logs:['Expedition started.']};}
 export default function GamePage(){
- const [seed]=useState(()=>Date.now());
- const dungeon=useMemo(()=>generateDungeon(seed,'C',12),[seed]);
- const [room,setRoom]=useState(0);
- const [hp,setHp]=useState(100);
- const [gold,setGold]=useState(340);
- const [log,setLog]=useState<string[]>(['Expedition started.']);
+ const [seed]=useState(()=>Date.now()); const dungeon=useMemo(()=>generateDungeon(seed,'C',12),[seed]); const [room,setRoom]=useState(0); const [hp,setHp]=useState(100); const [gold,setGold]=useState(340); const [log,setLog]=useState<string[]>(['Expedition started.']); const [gameState,setGameState]=useState<GameState>(()=>initialGameState());
  const current=dungeon.rooms[room];
- function act(){
-  if(current.kind==='Combat'||current.kind==='Elite'||current.kind==='Boss'){
-   setHp(v=>Math.max(1,v-(current.danger%13+4)));
-   setGold(v=>v+current.rewardTier*8);
-   setLog(l=>[`Cleared ${current.kind} encounter. +${current.rewardTier*8} gold.`,...l]);
-  } else {
-   setGold(v=>v+current.rewardTier*5);
-   setLog(l=>[`Resolved ${current.kind} room.`,...l]);
-  }
- }
+ function act(){if(current.kind==='Combat'||current.kind==='Elite'||current.kind==='Boss'){setHp(v=>Math.max(1,v-(current.danger%13+4)));setGold(v=>v+current.rewardTier*8);setLog(l=>[`Cleared ${current.kind} encounter. +${current.rewardTier*8} gold.`,...l]);}else{setGold(v=>v+current.rewardTier*5);setLog(l=>[`Resolved ${current.kind} room.`,...l]);}}
  function next(){setRoom(v=>Math.min(dungeon.rooms.length-1,v+1));setLog(l=>[`Entered room ${Math.min(room+2,dungeon.rooms.length)}.`,...l]);}
- const roomAsset = current.kind==='Treasure' ? 'prop.chest.iron' : current.kind==='Shrine' ? 'prop.shrine.basic' : (current.kind==='Combat'||current.kind==='Elite'||current.kind==='Boss') ? 'monster.slime.verdant' : 'hero.human.warrior';
- return <main className="rpg-shell">
-  <header className="topbar"><div className="brand"><span className="brand-mark">✦</span><div><b>VEILBOUND</b><small>Expedition Prototype · 2D Asset Pipeline</small></div></div><div className="top-stats"><span>HP {hp}/100</span><span>◈ {gold}</span></div></header>
-  <section className="hero-strip"><div><span className="eyebrow">PROCEDURAL DUNGEON</span><h1>{dungeon.name}</h1><p>Seed {seed} · Rank {dungeon.rank} · {dungeon.rooms.length} rooms</p></div></section>
-  <section className="game-grid">
-   <section className="center-column">
-    <div className="panel combat-panel">
-     <div className="panel-title"><span>ROOM {room+1} / {dungeon.rooms.length}</span><span>DANGER {current.danger}</span></div>
-     <div className="dungeon-scene" style={{backgroundImage:'url(/assets/veilbound/dungeon-floor.svg)'}}>
-      <div className="scene-vignette" />
-      <AssetSprite id={roomAsset} alt={current.kind} className="scene-sprite" />
-     </div>
-     <div className="enemy-stage"><h2>{current.kind}</h2><p>Reward Tier {current.rewardTier} · Connections {current.connections.length}</p></div>
-     <div className="combat-actions"><button onClick={act}>Resolve Room</button><button onClick={next}>Explore Next Room</button></div>
-    </div>
-    <div className="panel log-panel"><div className="panel-title">EXPEDITION LOG</div>{log.slice(0,10).map((x,i)=><p key={`${x}-${i}`}><time>•</time>{x}</p>)}</div>
-   </section>
-   <aside className="panel right-panel"><h2>Dungeon Route</h2>{dungeon.rooms.map((r,i)=><button key={r.id} onClick={()=>setRoom(i)} className={i===room?'active':''} style={{display:'block',width:'100%',textAlign:'left',marginBottom:6}}>{i+1}. {r.kind} · danger {r.danger}</button>)}<div className="asset-preview"><strong>Asset Layer</strong><p>Logical ID: <code>{roomAsset}</code></p><AssetSprite id={roomAsset} alt="Current asset" className="asset-preview-img" /></div></aside>
-  </section>
-  <footer>VEILBOUND · CC0 foundation assets + custom fallback layer · asset IDs are decoupled from gameplay</footer>
- </main>;
+ const roomAsset=current.kind==='Treasure'?'prop.chest.iron':current.kind==='Shrine'?'prop.shrine.basic':(current.kind==='Combat'||current.kind==='Elite'||current.kind==='Boss')?'monster.slime.verdant':'hero.human.warrior';
+ function updateState(next:GameState){setGameState(next);setGold(next.character.gold);setLog(next.logs.length?next.logs:['Save loaded.']);}
+ return <main className="rpg-shell"><header className="topbar"><div className="brand"><span className="brand-mark">✦</span><div><b>VEILBOUND</b><small>Expedition Prototype · 2D Asset Pipeline</small></div></div><div className="top-stats"><span>HP {hp}/100</span><span>◈ {gold}</span><span>Lv {gameState.character.level}</span></div></header><section className="hero-strip"><div><span className="eyebrow">PROCEDURAL DUNGEON</span><h1>{dungeon.name}</h1><p>Seed {seed} · Rank {dungeon.rank} · {dungeon.rooms.length} rooms</p></div></section><section className="game-grid"><section className="center-column"><div className="panel combat-panel"><div className="panel-title"><span>ROOM {room+1} / {dungeon.rooms.length}</span><span>DANGER {current.danger}</span></div><div className="dungeon-scene" style={{backgroundImage:'url(/assets/veilbound/dungeon-floor.svg)'}}><div className="scene-vignette"/><AssetSprite id={roomAsset} alt={current.kind} className="scene-sprite"/></div><div className="enemy-stage"><h2>{current.kind}</h2><p>Reward Tier {current.rewardTier} · Connections {current.connections.length}</p></div><div className="combat-actions"><button onClick={act}>Resolve Room</button><button onClick={next}>Explore Next Room</button></div></div><div className="panel log-panel"><div className="panel-title">EXPEDITION LOG</div>{log.slice(0,10).map((x,i)=><p key={`${x}-${i}`}><time>•</time>{x}</p>)}</div></section><aside className="panel right-panel"><h2>Dungeon Route</h2>{dungeon.rooms.map((r,i)=><button key={r.id} onClick={()=>setRoom(i)} className={i===room?'active':''} style={{display:'block',width:'100%',textAlign:'left',marginBottom:6}}>{i+1}. {r.kind} · danger {r.danger}</button>)}<div className="asset-preview"><strong>Asset Layer</strong><p>Logical ID: <code>{roomAsset}</code></p><AssetSprite id={roomAsset} alt="Current asset" className="asset-preview-img"/></div><SaveControls state={gameState} onLoad={updateState}/></aside></section><footer>VEILBOUND · CC0 foundation assets + custom fallback layer · asset IDs are decoupled from gameplay</footer></main>;
 }
